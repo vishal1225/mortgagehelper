@@ -52,13 +52,13 @@ export default async function ConfirmationPage({
             >
               Back to home
             </Link>
-            <Link
-              href="/broker/login"
-              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-            >
-              Broker portal
-            </Link>
           </div>
+          <p className="text-xs text-slate-500">
+            Are you a licensed broker?{" "}
+            <Link href="/broker/login" className="underline">
+              Access broker portal
+            </Link>
+          </p>
         </section>
       </Container>
     </main>
