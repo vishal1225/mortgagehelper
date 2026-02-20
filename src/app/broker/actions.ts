@@ -147,8 +147,18 @@ type LeadForUnlock = {
 
 export async function startLeadUnlockCheckoutAction(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "").trim();
+  const debugEnv = {
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "missing",
+    appBaseUrl: process.env.APP_BASE_URL ?? "missing",
+    hasServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    commitSha:
+      process.env.VERCEL_GIT_COMMIT_SHA ||
+      process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ||
+      "unknown",
+  };
 
   if (!leadId) {
+    console.error("unlock_debug_invalid_lead_id", debugEnv);
     redirectWithMessage("/broker/dashboard", "Invalid lead selection.");
   }
 
@@ -168,6 +178,10 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
     .maybeSingle<BrokerForUnlock>();
 
   if (brokerError || !broker) {
+    console.error("unlock_debug_broker_load_failed", {
+      ...debugEnv,
+      error: brokerError?.message ?? "missing_broker",
+    });
     redirectWithMessage("/broker/onboarding", "Please complete broker onboarding first.");
   }
 
@@ -179,6 +193,11 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
     .maybeSingle<LeadForUnlock>();
 
   if (leadError || !lead) {
+    console.error("unlock_debug_lead_load_failed", {
+      ...debugEnv,
+      error: leadError?.message ?? "missing_lead",
+      leadId,
+    });
     redirectWithMessage("/broker/dashboard", "Lead is no longer available.");
   }
 
@@ -269,6 +288,12 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
   }
 
   if (lockError) {
+    console.error("unlock_debug_lock_error", {
+      ...debugEnv,
+      leadId: lead.id,
+      brokerId: broker.id,
+      error: lockError.message,
+    });
     redirectWithMessage(
       "/broker/dashboard",
       `Lead lock failed: ${lockError.message}`,
@@ -276,6 +301,13 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
   }
 
   if (!lockedLead) {
+    console.error("unlock_debug_lock_not_acquired", {
+      ...debugEnv,
+      leadId: lead.id,
+      brokerId: broker.id,
+      lockExpiresAt: lead.lock_expires_at,
+      lockedByBrokerId: lead.locked_by_broker_id,
+    });
     redirectWithMessage(
       "/broker/dashboard",
       "Lead lock could not be acquired. Another broker may have started checkout.",
@@ -319,6 +351,12 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
 
     redirect(checkoutSession.url);
   } catch (error) {
+    console.error("unlock_debug_stripe_create_failed", {
+      ...debugEnv,
+      leadId: lockedLead.id,
+      brokerId: broker.id,
+      error: error instanceof Error ? error.message : String(error),
+    });
     await adminClient
       .from("leads")
       .update({
