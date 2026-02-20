@@ -233,7 +233,14 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
     .select("id, segment")
     .maybeSingle<{ id: string; segment: "refinance" | "self_employed" }>();
 
-  if (lockError || !lockedLead) {
+  if (lockError) {
+    redirectWithMessage(
+      "/broker/dashboard",
+      `Lead lock failed: ${lockError.message}`,
+    );
+  }
+
+  if (!lockedLead) {
     redirectWithMessage(
       "/broker/dashboard",
       "Lead lock could not be acquired. Another broker may have started checkout.",
@@ -276,7 +283,7 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
     }
 
     redirect(checkoutSession.url);
-  } catch {
+  } catch (error) {
     await adminClient
       .from("leads")
       .update({
@@ -289,7 +296,9 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
 
     redirectWithMessage(
       "/broker/dashboard",
-      "Could not start Stripe checkout. Please try again.",
+      `Could not start Stripe checkout. ${
+        error instanceof Error ? error.message : "Please try again."
+      }`,
     );
   }
 }
