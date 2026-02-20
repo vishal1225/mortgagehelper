@@ -218,20 +218,55 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
 
   const lockExpiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
   const nowIso = now.toISOString();
+  const lockPayload = {
+    locked_by_broker_id: broker.id,
+    lock_expires_at: lockExpiresAt,
+  };
 
-  const { data: lockedLead, error: lockError } = await adminClient
-    .from("leads")
-    .update({
-      locked_by_broker_id: broker.id,
-      lock_expires_at: lockExpiresAt,
-    })
-    .eq("id", lead.id)
-    .eq("is_unlocked", false)
-    .or(
-      `lock_expires_at.is.null,lock_expires_at.lt.${nowIso},locked_by_broker_id.eq.${broker.id}`,
-    )
-    .select("id, segment")
-    .maybeSingle<{ id: string; segment: "refinance" | "self_employed" }>();
+  const tryAcquireLock = async (
+    mode: "null" | "expired" | "owned",
+  ): Promise<{
+    data: { id: string; segment: "refinance" | "self_employed" } | null;
+    error: { message: string } | null;
+  }> => {
+    let query = adminClient
+      .from("leads")
+      .update(lockPayload)
+      .eq("id", lead.id)
+      .eq("is_unlocked", false);
+
+    if (mode === "null") {
+      query = query.is("lock_expires_at", null);
+    } else if (mode === "expired") {
+      query = query.lt("lock_expires_at", nowIso);
+    } else {
+      query = query.eq("locked_by_broker_id", broker.id);
+    }
+
+    const result = await query
+      .select("id, segment")
+      .maybeSingle<{ id: string; segment: "refinance" | "self_employed" }>();
+
+    return {
+      data: result.data,
+      error: result.error ? { message: result.error.message } : null,
+    };
+  };
+
+  let lockedLead: { id: string; segment: "refinance" | "self_employed" } | null = null;
+  let lockError: { message: string } | null = null;
+
+  for (const mode of ["null", "expired", "owned"] as const) {
+    const attempt = await tryAcquireLock(mode);
+    if (attempt.error) {
+      lockError = attempt.error;
+      break;
+    }
+    if (attempt.data) {
+      lockedLead = attempt.data;
+      break;
+    }
+  }
 
   if (lockError) {
     redirectWithMessage(
