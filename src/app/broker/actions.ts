@@ -321,8 +321,12 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
   const successUrl = `${getAppBaseUrl()}/broker/dashboard?message=${encodeURIComponent("Payment received. Finalising unlock...")}`;
   const cancelUrl = `${getAppBaseUrl()}/broker/dashboard?message=${encodeURIComponent("Checkout cancelled. Lock expires in 5 minutes.")}`;
 
+  let checkoutSession:
+    | { url: string | null; id: string }
+    | null = null;
+
   try {
-    const checkoutSession = await stripe.checkout.sessions.create({
+    checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
@@ -345,15 +349,10 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
       ],
     });
 
-    if (!checkoutSession.url) {
-      throw new Error("Checkout session URL not returned by Stripe.");
-    }
-
-    redirect(checkoutSession.url);
   } catch (error) {
     console.error("unlock_debug_stripe_create_failed", {
       ...debugEnv,
-      leadId: lockedLead.id,
+      leadId: lockedLead?.id ?? null,
       brokerId: broker.id,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -374,6 +373,25 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
       }`,
     );
   }
+
+  if (!checkoutSession?.url) {
+    await adminClient
+      .from("leads")
+      .update({
+        locked_by_broker_id: null,
+        lock_expires_at: null,
+      })
+      .eq("id", lockedLead.id)
+      .eq("is_unlocked", false)
+      .eq("locked_by_broker_id", broker.id);
+
+    redirectWithMessage(
+      "/broker/dashboard",
+      "Could not start Stripe checkout. Checkout URL was not returned.",
+    );
+  }
+
+  redirect(checkoutSession.url);
 }
 
 export async function updateLeadStatusAction(formData: FormData) {
