@@ -55,8 +55,8 @@ describe("readiness", () => {
         calculateSelfEmployedReadiness({
           creditScoreBand: "good",
           depositBand: "10to20",
-          businessYears: "2to3",
-          hasTwoYearsFinancials: "yes",
+          businessYears: "1to2",
+          hasTwoYearsFinancials: "no",
         }),
       ).toBe("Amber");
     });

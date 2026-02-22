@@ -11,7 +11,7 @@ export default function SelfEmployedLandingPage() {
             <p className="section-kicker">
               VIC + NSW
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+            <h1 className="section-title">
               Self-employed readiness check
             </h1>
             <p className="section-subtitle max-w-2xl">

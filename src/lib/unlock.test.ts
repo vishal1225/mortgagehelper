@@ -47,4 +47,46 @@ describe("isLeadLockedByOtherBroker", () => {
       }),
     ).toBe(true);
   });
+
+  it("returns false when locked by another broker but lock_expires_at is null (unlocked lead)", () => {
+    expect(
+      isLeadLockedByOtherBroker({
+        lockedByBrokerId: "broker-b",
+        currentBrokerId: "broker-a",
+        lockExpiresAt: null,
+        now,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false when lock expires exactly at now (boundary - lock is expired)", () => {
+    expect(
+      isLeadLockedByOtherBroker({
+        lockedByBrokerId: "broker-b",
+        currentBrokerId: "broker-a",
+        lockExpiresAt: "2026-02-18T00:00:00.000Z",
+        now: new Date("2026-02-18T00:00:00.000Z"),
+      }),
+    ).toBe(false);
+  });
+
+  it("returns true when lock expires 1ms after now (still active)", () => {
+    expect(
+      isLeadLockedByOtherBroker({
+        lockedByBrokerId: "broker-b",
+        currentBrokerId: "broker-a",
+        lockExpiresAt: "2026-02-18T00:00:00.001Z",
+        now: new Date("2026-02-18T00:00:00.000Z"),
+      }),
+    ).toBe(true);
+  });
+
+  it("uses current time when now is not provided", () => {
+    const result = isLeadLockedByOtherBroker({
+      lockedByBrokerId: "broker-b",
+      currentBrokerId: "broker-a",
+      lockExpiresAt: new Date(Date.now() + 60000).toISOString(),
+    });
+    expect(result).toBe(true);
+  });
 });

@@ -1,4 +1,13 @@
-# Stripe CLI
+# Stripe Integration
+
+## Webhook (MVP)
+
+- **Endpoint**: `POST /api/stripe/webhook`
+- **Event**: `checkout.session.completed`
+- **Security**: Signature verified via `STRIPE_WEBHOOK_SECRET`
+- **Behavior**: Calls `complete_lead_unlock` RPC to mark lead unlocked and create unlock record
+
+## Stripe CLI
 
 Use the command line to manage your Stripe resources in a sandbox.
 

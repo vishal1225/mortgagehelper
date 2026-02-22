@@ -56,4 +56,37 @@ describe("matchesBrokerCoverage", () => {
       }),
     ).toBe(false);
   });
+
+  it("returns true when broker has both specialties and lead matches self_employed", () => {
+    expect(
+      matchesBrokerCoverage({
+        brokerStates: ["VIC", "NSW"],
+        brokerSpecialties: ["refinance", "self_employed"],
+        leadState: "NSW",
+        leadSegment: "self_employed",
+      }),
+    ).toBe(true);
+  });
+
+  it("returns false when segment matches but state does not", () => {
+    expect(
+      matchesBrokerCoverage({
+        brokerStates: ["VIC"],
+        brokerSpecialties: ["refinance", "self_employed"],
+        leadState: "NSW",
+        leadSegment: "refinance",
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false when state matches but segment does not", () => {
+    expect(
+      matchesBrokerCoverage({
+        brokerStates: ["VIC", "NSW"],
+        brokerSpecialties: ["refinance"],
+        leadState: "VIC",
+        leadSegment: "self_employed",
+      }),
+    ).toBe(false);
+  });
 });

@@ -10,7 +10,7 @@ export default function Home() {
             <p className="section-kicker">
               Mortgage Readiness & Broker Match
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+            <h1 className="section-title">
               Choose your borrower pathway
             </h1>
             <p className="section-subtitle max-w-2xl">
