@@ -67,8 +67,10 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
 
   return (
     <form action={submitBorrowerLeadAction} className="space-y-6">
-      <div className="rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-700">
-        Step {step} of {totalSteps}
+      <div className="card-muted px-3 py-2 text-sm text-slate-700">
+        {step === 1 && "Step 1 of 3: Contact details"}
+        {step === 2 && "Step 2 of 3: Financial profile"}
+        {step === 3 && `Step 3 of 3: ${toSegmentLabel(segment)} questions`}
       </div>
 
       {step === 1 ? (
@@ -76,7 +78,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <label className="space-y-1 text-sm">
             <span className="font-medium">First name</span>
             <input
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="input-field"
               value={form.firstName}
               onChange={(event) => setForm({ ...form, firstName: event.target.value })}
               required
@@ -85,7 +87,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <label className="space-y-1 text-sm">
             <span className="font-medium">Last name</span>
             <input
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="input-field"
               value={form.lastName}
               onChange={(event) => setForm({ ...form, lastName: event.target.value })}
               required
@@ -94,7 +96,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <label className="space-y-1 text-sm sm:col-span-2">
             <span className="font-medium">Email</span>
             <input
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="input-field"
               type="email"
               value={form.email}
               onChange={(event) => setForm({ ...form, email: event.target.value })}
@@ -104,7 +106,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <label className="space-y-1 text-sm">
             <span className="font-medium">Phone</span>
             <input
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="input-field"
               value={form.phone}
               onChange={(event) => setForm({ ...form, phone: event.target.value })}
               required
@@ -113,7 +115,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <label className="space-y-1 text-sm">
             <span className="font-medium">State</span>
             <select
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="input-field"
               value={form.state}
               onChange={(event) =>
                 setForm({ ...form, state: event.target.value as "VIC" | "NSW" | "" })
@@ -133,7 +135,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <label className="space-y-1 text-sm">
             <span className="font-medium">Credit profile</span>
             <select
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="input-field"
               value={form.creditScoreBand}
               onChange={(event) =>
                 setForm({
@@ -153,7 +155,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <label className="space-y-1 text-sm">
             <span className="font-medium">Deposit / equity level</span>
             <select
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="input-field"
               value={form.depositBand}
               onChange={(event) =>
                 setForm({
@@ -182,7 +184,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
             <label className="space-y-1 text-sm">
               <span className="font-medium">How stable is your income?</span>
               <select
-                className="w-full rounded-md border border-slate-300 px-3 py-2"
+                className="input-field"
                 value={form.incomeStable}
                 onChange={(event) =>
                   setForm({
@@ -203,7 +205,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
               <label className="space-y-1 text-sm">
                 <span className="font-medium">Years self-employed</span>
                 <select
-                  className="w-full rounded-md border border-slate-300 px-3 py-2"
+                  className="input-field"
                   value={form.businessYears}
                   onChange={(event) =>
                     setForm({
@@ -223,7 +225,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
               <label className="space-y-1 text-sm">
                 <span className="font-medium">Two years financials ready?</span>
                 <select
-                  className="w-full rounded-md border border-slate-300 px-3 py-2"
+                  className="input-field"
                   value={form.hasTwoYearsFinancials}
                   onChange={(event) =>
                     setForm({
@@ -248,7 +250,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
         {step > 1 ? (
           <button
             type="button"
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="btn-secondary"
             onClick={() => setStep((prev) => prev - 1)}
           >
             Back
@@ -259,7 +261,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <button
             type="button"
             disabled={!canAdvance}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-slate-700"
+            className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => setStep((prev) => prev + 1)}
           >
             Continue
@@ -268,7 +270,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
           <button
             type="submit"
             disabled={!canAdvance}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-slate-700"
+            className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Submit quiz
           </button>

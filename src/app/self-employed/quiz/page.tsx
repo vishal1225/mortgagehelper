@@ -12,14 +12,14 @@ export default async function SelfEmployedQuizPage({
   const { message } = await searchParams;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <section className="mx-auto max-w-3xl space-y-6 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="card mx-auto max-w-3xl space-y-6 p-10">
           <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+            <p className="section-kicker">
               Self-employed quiz
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="section-title">
               Check your self-employed readiness
             </h1>
           </div>
@@ -32,7 +32,7 @@ export default async function SelfEmployedQuizPage({
 
           <BorrowerQuizForm segment="self_employed" />
 
-          <p className="text-sm text-slate-600">
+          <p className="section-subtitle">
             Looking for refinance?{" "}
             <Link href="/refinance/quiz" className="font-medium underline">
               Switch pathway

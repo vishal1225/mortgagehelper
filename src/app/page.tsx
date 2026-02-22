@@ -3,17 +3,17 @@ import { Container } from "@/components/Container";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <div className="space-y-8 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="card space-y-8 p-10">
           <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+            <p className="section-kicker">
               Mortgage Readiness & Broker Match
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
               Choose your borrower pathway
             </h1>
-            <p className="max-w-2xl text-slate-600">
+            <p className="section-subtitle max-w-2xl">
               Start with the correct eligibility flow to submit your mortgage
               lead in VIC or NSW.
             </p>

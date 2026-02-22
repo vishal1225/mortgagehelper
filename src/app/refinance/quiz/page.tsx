@@ -12,14 +12,14 @@ export default async function RefinanceQuizPage({
   const { message } = await searchParams;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <section className="mx-auto max-w-3xl space-y-6 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="card mx-auto max-w-3xl space-y-6 p-10">
           <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+            <p className="section-kicker">
               Refinance quiz
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="section-title">
               Check your refinance readiness
             </h1>
           </div>

@@ -12,15 +12,15 @@ export default async function BrokerSignupPage({
   const { message } = await searchParams;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <section className="mx-auto max-w-lg space-y-6 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="card mx-auto max-w-lg space-y-6 p-8">
           <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+            <p className="section-kicker">
               Broker portal
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight">Broker sign up</h1>
-            <p className="text-sm text-slate-600">
+            <h1 className="section-title">Broker sign up</h1>
+            <p className="section-subtitle">
               Create your broker account for VIC/NSW lead access.
             </p>
           </div>
@@ -37,7 +37,7 @@ export default async function BrokerSignupPage({
                 Email
               </label>
               <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2"
+                className="input-field"
                 id="email"
                 name="email"
                 type="email"
@@ -49,7 +49,7 @@ export default async function BrokerSignupPage({
                 Password
               </label>
               <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2"
+                className="input-field"
                 id="password"
                 name="password"
                 type="password"
@@ -59,7 +59,7 @@ export default async function BrokerSignupPage({
             </div>
             <button
               type="submit"
-              className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+              className="btn-primary w-full"
             >
               Create account
             </button>

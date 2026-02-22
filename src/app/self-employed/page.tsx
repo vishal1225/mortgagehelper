@@ -1,19 +1,20 @@
+import Link from "next/link";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Container } from "@/components/Container";
 
 export default function SelfEmployedLandingPage() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <section className="space-y-8 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="card space-y-8 p-10">
           <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+            <p className="section-kicker">
               VIC + NSW
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
               Self-employed readiness check
             </h1>
-            <p className="max-w-2xl text-slate-600">
+            <p className="section-subtitle max-w-2xl">
               Check your eligibility profile as a self-employed borrower before
               broker matching.
             </p>
@@ -25,9 +26,11 @@ export default function SelfEmployedLandingPage() {
             <li>Qualified broker gets exclusive lead access after payment</li>
           </ul>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <ButtonLink href="/self-employed/quiz">Start self-employed quiz</ButtonLink>
-            <ButtonLink href="/">Back to home</ButtonLink>
+            <Link className="btn-secondary" href="/">
+              Back to home
+            </Link>
           </div>
         </section>
       </Container>

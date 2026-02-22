@@ -102,7 +102,7 @@ export default async function BrokerDashboardPage({
   );
 
   if (leadsError) {
-    redirect("/broker/onboarding?message=Could%20not%20load%20matching%20leads.");
+    redirect("/broker/dashboard?message=Could%20not%20load%20matching%20leads.%20Please%20try%20again.");
   }
   const typedLeads = (leads ?? []) as LeadPreview[];
 
@@ -119,18 +119,16 @@ export default async function BrokerDashboardPage({
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <section className="space-y-6 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="card space-y-6 p-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-2">
-              <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
-                Broker dashboard
-              </p>
-              <h1 className="text-2xl font-semibold tracking-tight">
+              <p className="section-kicker">Broker dashboard</p>
+              <h1 className="section-title">
                 Welcome, {broker.full_name}
               </h1>
-              <p className="text-sm text-slate-600">
+              <p className="section-subtitle">
                 You are viewing live lead previews matched by state and specialty.
                 Contact details stay locked until paid unlock.
               </p>
@@ -138,7 +136,7 @@ export default async function BrokerDashboardPage({
             <form action={signOutBrokerAction}>
               <button
                 type="submit"
-                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="btn-secondary"
               >
                 Sign out
               </button>
@@ -152,7 +150,7 @@ export default async function BrokerDashboardPage({
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-md border border-slate-200 p-4">
+            <div className="card-muted p-4">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
                 Contact
               </h2>
@@ -161,7 +159,7 @@ export default async function BrokerDashboardPage({
                 <p className="text-sm text-slate-700">{broker.company_name}</p>
               ) : null}
             </div>
-            <div className="rounded-md border border-slate-200 p-4">
+            <div className="card-muted p-4">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
                 Match preferences
               </h2>
@@ -190,26 +188,23 @@ export default async function BrokerDashboardPage({
             ) : (
               <div className="grid gap-4">
                 {typedLeads.map((lead) => (
-                  <article
-                    key={lead.id}
-                    className="space-y-3 rounded-lg border border-slate-200 bg-white p-4"
-                  >
+                  <article key={lead.id} className="card space-y-3 p-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium uppercase tracking-wide text-slate-700">
+                      <span className="badge">
                         {lead.segment === "self_employed" ? "self employed" : lead.segment}
                       </span>
-                      <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium uppercase tracking-wide text-slate-700">
+                      <span className="badge">
                         {lead.state}
                       </span>
                       <span
-                        className={`rounded-md border px-2 py-1 text-xs font-medium ${getScoreStyle(lead.readiness_score)}`}
+                        className={`badge ${getScoreStyle(lead.readiness_score)}`}
                       >
                         {lead.readiness_score}
                       </span>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-md border border-slate-200 p-3">
+                      <div className="card-muted p-3">
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                           Contact details
                         </p>
@@ -217,7 +212,7 @@ export default async function BrokerDashboardPage({
                         <p className="text-sm text-slate-700">Email: Locked until unlock</p>
                         <p className="text-sm text-slate-700">Phone: Locked until unlock</p>
                       </div>
-                      <div className="rounded-md border border-slate-200 p-3">
+                      <div className="card-muted p-3">
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                           Quiz preview
                         </p>
@@ -231,7 +226,7 @@ export default async function BrokerDashboardPage({
                       <input type="hidden" name="lead_id" value={lead.id} />
                       <button
                         type="submit"
-                        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                        className="btn-primary"
                       >
                         Unlock lead ({getLeadPriceLabel(lead.segment)})
                       </button>
@@ -258,7 +253,7 @@ export default async function BrokerDashboardPage({
                 {unlockedLeads.map((lead) => (
                   <article
                     key={lead.id}
-                    className="flex flex-col gap-2 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="card flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-slate-900">
@@ -272,7 +267,7 @@ export default async function BrokerDashboardPage({
                     </div>
                     <Link
                       href={`/broker/leads/${lead.id}`}
-                      className="inline-flex items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                      className="btn-secondary"
                     >
                       View lead
                     </Link>

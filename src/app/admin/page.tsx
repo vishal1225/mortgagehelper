@@ -61,12 +61,12 @@ export default async function AdminPage({
   ]);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <section className="space-y-6 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="card space-y-6 p-8">
           <div>
-            <p className="text-sm font-medium uppercase tracking-wide text-slate-500">Admin</p>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <p className="section-kicker">Admin</p>
+            <h1 className="section-title">
               Leads and unlock transactions
             </h1>
           </div>

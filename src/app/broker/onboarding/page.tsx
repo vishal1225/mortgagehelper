@@ -32,15 +32,15 @@ export default async function BrokerOnboardingPage({
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen">
       <Container>
-        <section className="mx-auto max-w-2xl space-y-6 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="card mx-auto max-w-2xl space-y-6 p-8">
           <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+            <p className="section-kicker">
               Broker onboarding
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight">Complete your profile</h1>
-            <p className="text-sm text-slate-600">
+            <h1 className="section-title">Complete your profile</h1>
+            <p className="section-subtitle">
               This profile controls which lead previews you can access.
             </p>
           </div>
@@ -57,7 +57,7 @@ export default async function BrokerOnboardingPage({
                 Full name
               </label>
               <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2"
+                className="input-field"
                 id="full_name"
                 name="full_name"
                 required
@@ -69,7 +69,7 @@ export default async function BrokerOnboardingPage({
                 Company name (optional)
               </label>
               <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2"
+                className="input-field"
                 id="company_name"
                 name="company_name"
               />
@@ -80,7 +80,7 @@ export default async function BrokerOnboardingPage({
                 Phone
               </label>
               <input
-                className="w-full rounded-md border border-slate-300 px-3 py-2"
+                className="input-field"
                 id="phone"
                 name="phone"
                 required
@@ -88,13 +88,10 @@ export default async function BrokerOnboardingPage({
             </div>
 
             <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">State coverage</legend>
+              <legend className="text-sm font-medium">State coverage (select at least one)</legend>
               <div className="grid gap-2 sm:grid-cols-2">
                 {STATE_OPTIONS.map((state) => (
-                  <label
-                    className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm"
-                    key={state}
-                  >
+                  <label className="card-muted flex items-center gap-2 px-3 py-2 text-sm" key={state}>
                     <input name="state_coverage" type="checkbox" value={state} />
                     {state}
                   </label>
@@ -103,13 +100,10 @@ export default async function BrokerOnboardingPage({
             </fieldset>
 
             <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">Specialties</legend>
+              <legend className="text-sm font-medium">Specialties (select at least one)</legend>
               <div className="grid gap-2 sm:grid-cols-2">
                 {SPECIALTY_OPTIONS.map((specialty) => (
-                  <label
-                    className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm"
-                    key={specialty}
-                  >
+                  <label className="card-muted flex items-center gap-2 px-3 py-2 text-sm" key={specialty}>
                     <input name="specialties" type="checkbox" value={specialty} />
                     {specialty === "self_employed" ? "self employed" : specialty}
                   </label>
@@ -119,7 +113,7 @@ export default async function BrokerOnboardingPage({
 
             <button
               type="submit"
-              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+              className="btn-primary"
             >
               Save profile
             </button>
@@ -128,7 +122,7 @@ export default async function BrokerOnboardingPage({
           <form action={signOutBrokerAction}>
             <button
               type="submit"
-              className="text-sm font-medium text-slate-600 underline hover:text-slate-900"
+              className="btn-ghost"
             >
               Sign out
             </button>
