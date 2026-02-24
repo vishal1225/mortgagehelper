@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@/components/Analytics";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 
@@ -31,10 +34,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="min-h-screen">
+          <Suspense fallback={null}>
+            <PageViewTracker />
+          </Suspense>
           <Header />
           {children}
           <Footer />
         </div>
+        <Analytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
       </body>
     </html>
   );

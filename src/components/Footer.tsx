@@ -29,6 +29,12 @@ export function Footer() {
               >
                 Start self-employed quiz
               </Link>
+              <Link className="text-slate-600 hover:text-slate-900" href="/privacy">
+                Privacy policy
+              </Link>
+              <Link className="text-slate-600 hover:text-slate-900" href="/terms">
+                Terms
+              </Link>
             </div>
           </div>
           <div className="space-y-3 text-sm">
@@ -44,6 +50,9 @@ export function Footer() {
                 href="/broker/signup"
               >
                 Create account
+              </Link>
+              <Link className="text-slate-600 hover:text-slate-900" href="/terms">
+                Broker terms & refunds
               </Link>
             </div>
           </div>

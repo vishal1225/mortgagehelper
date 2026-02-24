@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ButtonLink } from "@/components/ButtonLink";
 import { Container } from "@/components/Container";
 
@@ -19,10 +20,15 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <ButtonLink href="/refinance">Refinance pathway</ButtonLink>
             <ButtonLink href="/self-employed">Self-employed pathway</ButtonLink>
-            <ButtonLink href="/broker">Broker portal</ButtonLink>
+            <Link
+              href="/broker"
+              className="btn-broker inline-flex items-center justify-center"
+            >
+              Broker portal
+            </Link>
           </div>
         </div>
       </Container>

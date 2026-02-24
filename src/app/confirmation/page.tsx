@@ -36,13 +36,13 @@ export default async function ConfirmationPage({
             </p>
           </div>
 
-          <div className={`rounded-md border px-4 py-3 text-lg font-semibold ${getScoreStyle(score)}`}>
+          <div className={`rounded-xl border px-4 py-3 text-lg font-semibold ${getScoreStyle(score)}`}>
             Readiness score: {score}
           </div>
 
           <p className="text-sm text-slate-600">
-            A matching broker in VIC or NSW can review your lead and unlock
-            your details if suitable.
+            A matching broker in VIC or NSW will review your lead and reach out
+            within 1 business day if they can assist.
           </p>
 
           <div className="flex flex-wrap gap-3">

@@ -6,6 +6,7 @@ import { isLeadStatus } from "@/lib/lead-status";
 import { isLeadSegment } from "@/lib/leads";
 import { matchesBrokerCoverage } from "@/lib/matching";
 import { LEAD_PRICING_AUD_CENTS } from "@/lib/pricing";
+import { logServerError } from "@/lib/server-logging";
 import { getAppBaseUrl } from "@/lib/server-env";
 import { createStripeClient } from "@/lib/stripe";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -159,6 +160,7 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
 
   if (!leadId) {
     console.error("unlock_debug_invalid_lead_id", debugEnv);
+    await logServerError("unlock_invalid_lead_id", "Missing lead id.", debugEnv);
     redirectWithMessage("/broker/dashboard", "Invalid lead selection.");
   }
 
@@ -182,6 +184,9 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
       ...debugEnv,
       error: brokerError?.message ?? "missing_broker",
     });
+    await logServerError("unlock_broker_load_failed", brokerError?.message ?? "missing_broker", {
+      ...debugEnv,
+    });
     redirectWithMessage("/broker/onboarding", "Please complete broker onboarding first.");
   }
 
@@ -196,6 +201,10 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
     console.error("unlock_debug_lead_load_failed", {
       ...debugEnv,
       error: leadError?.message ?? "missing_lead",
+      leadId,
+    });
+    await logServerError("unlock_lead_load_failed", leadError?.message ?? "missing_lead", {
+      ...debugEnv,
       leadId,
     });
     redirectWithMessage("/broker/dashboard", "Lead is no longer available.");
@@ -294,6 +303,11 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
       brokerId: broker.id,
       error: lockError.message,
     });
+    await logServerError("unlock_lock_error", lockError.message, {
+      ...debugEnv,
+      leadId: lead.id,
+      brokerId: broker.id,
+    });
     redirectWithMessage(
       "/broker/dashboard",
       `Lead lock failed: ${lockError.message}`,
@@ -318,7 +332,7 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
   const segmentLabel =
     lockedLead.segment === "self_employed" ? "Self-employed" : "Refinance";
   const priceCents = LEAD_PRICING_AUD_CENTS[lockedLead.segment];
-  const successUrl = `${getAppBaseUrl()}/broker/dashboard?message=${encodeURIComponent("Payment received. Finalising unlock...")}`;
+  const successUrl = `${getAppBaseUrl()}/broker/unlock/complete?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${getAppBaseUrl()}/broker/dashboard?message=${encodeURIComponent("Checkout cancelled. Lock expires in 5 minutes.")}`;
 
   let checkoutSession:
@@ -356,6 +370,15 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
       brokerId: broker.id,
       error: error instanceof Error ? error.message : String(error),
     });
+    await logServerError(
+      "unlock_stripe_create_failed",
+      error instanceof Error ? error.message : String(error),
+      {
+        ...debugEnv,
+        leadId: lockedLead?.id ?? null,
+        brokerId: broker.id,
+      },
+    );
     await adminClient
       .from("leads")
       .update({
@@ -375,6 +398,11 @@ export async function startLeadUnlockCheckoutAction(formData: FormData) {
   }
 
   if (!checkoutSession?.url) {
+    await logServerError("unlock_checkout_missing_url", "Checkout URL was not returned.", {
+      ...debugEnv,
+      leadId: lockedLead.id,
+      brokerId: broker.id,
+    });
     await adminClient
       .from("leads")
       .update({
