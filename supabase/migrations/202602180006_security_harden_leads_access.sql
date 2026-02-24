@@ -1,7 +1,6 @@
 drop policy if exists "leads_select_authenticated" on public.leads;
 
 drop policy if exists "leads_select_unlocked_owned" on public.leads;
-drop policy if exists "error_logs_select_admin" on public.error_logs;
 create policy "leads_select_unlocked_owned"
 on public.leads
 for select
@@ -15,12 +14,6 @@ using (
       and b.auth_user_id = auth.uid()
   )
 );
-
-create policy "error_logs_select_admin"
-on public.error_logs
-for select
-to authenticated
-using (false);
 
 create or replace function public.get_matching_lead_previews(p_limit integer default 50)
 returns table (

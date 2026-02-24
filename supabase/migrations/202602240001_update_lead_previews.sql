@@ -1,4 +1,6 @@
-create or replace function public.get_matching_lead_previews(p_limit integer default 50)
+drop function if exists public.get_matching_lead_previews(integer);
+
+create function public.get_matching_lead_previews(p_limit integer default 50)
 returns table (
   id uuid,
   segment text,
