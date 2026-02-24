@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { updateLeadStatusAction } from "@/app/broker/actions";
+import { BrokerLeadDetailTracker } from "@/components/broker/BrokerLeadDetailTracker";
 import { Container } from "@/components/Container";
 import { LEAD_STATUS_OPTIONS } from "@/lib/lead-status";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -95,10 +96,19 @@ export default async function BrokerLeadDetailPage({
 
   const quizRows = getQuizRows(lead.quiz_data);
 
+  const unlockSuccess = Boolean(message && message.toLowerCase().includes("lead unlocked"));
+
   return (
     <main className="min-h-screen">
       <Container>
         <section className="card space-y-6 p-8">
+          <BrokerLeadDetailTracker
+            leadId={lead.id}
+            segment={lead.segment}
+            state={lead.state}
+            readinessScore={lead.readiness_score}
+            unlockSuccess={unlockSuccess}
+          />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-2">
               <p className="section-kicker">Unlocked lead detail</p>

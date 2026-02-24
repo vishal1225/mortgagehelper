@@ -15,7 +15,7 @@ export function Header() {
             <Link className="btn-ghost" href="/self-employed">
               Self-employed
             </Link>
-            <Link className="btn-secondary" href="/broker">
+            <Link className="btn-broker" href="/broker">
               Broker portal
             </Link>
           </nav>

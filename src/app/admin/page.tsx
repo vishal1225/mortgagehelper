@@ -40,7 +40,7 @@ export default async function AdminPage({
   const { token } = await searchParams;
   const adminToken = process.env.ADMIN_ROUTE_TOKEN;
 
-  if (adminToken && token !== adminToken) {
+  if (!adminToken || token !== adminToken) {
     notFound();
   }
 

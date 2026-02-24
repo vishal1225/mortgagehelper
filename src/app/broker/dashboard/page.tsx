@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOutBrokerAction, startLeadUnlockCheckoutAction } from "@/app/broker/actions";
+import { BrokerDashboardTracker } from "@/components/broker/BrokerDashboardTracker";
+import { UnlockLeadButton } from "@/components/broker/UnlockLeadButton";
 import { Container } from "@/components/Container";
 import { getLeadPriceLabel } from "@/lib/pricing";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isLeadLockedByOtherBroker } from "@/lib/unlock";
 
 type BrokerProfile = {
   id: string;
@@ -26,6 +29,16 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("en-AU", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 type LeadPreview = {
   id: string;
   segment: "refinance" | "self_employed";
@@ -33,6 +46,9 @@ type LeadPreview = {
   readiness_score: "Green" | "Amber" | "Red";
   quiz_data: Record<string, string>;
   created_at: string;
+  is_unlocked?: boolean | null;
+  locked_by_broker_id?: string | null;
+  lock_expires_at?: string | null;
 };
 
 type UnlockedLeadSummary = {
@@ -105,6 +121,7 @@ export default async function BrokerDashboardPage({
     redirect("/broker/dashboard?message=Could%20not%20load%20matching%20leads.%20Please%20try%20again.");
   }
   const typedLeads = (leads ?? []) as LeadPreview[];
+  const now = new Date();
 
   const { data: unlockedLeads, error: unlockedError } = await supabase
     .from("leads")
@@ -122,6 +139,7 @@ export default async function BrokerDashboardPage({
     <main className="min-h-screen">
       <Container>
         <section className="card space-y-6 p-8">
+          <BrokerDashboardTracker message={message} />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-2">
               <p className="section-kicker">Broker dashboard</p>
@@ -222,15 +240,44 @@ export default async function BrokerDashboardPage({
                         </p>
                       </div>
                     </div>
-                    <form action={startLeadUnlockCheckoutAction} className="pt-1">
-                      <input type="hidden" name="lead_id" value={lead.id} />
-                      <button
-                        type="submit"
-                        className="btn-primary"
-                      >
-                        Unlock lead ({getLeadPriceLabel(lead.segment)})
-                      </button>
-                    </form>
+                    <UnlockLeadButton
+                      action={startLeadUnlockCheckoutAction}
+                      leadId={lead.id}
+                      segment={lead.segment}
+                      priceLabel={getLeadPriceLabel(lead.segment)}
+                      disabled={
+                        Boolean(lead.is_unlocked) ||
+                        isLeadLockedByOtherBroker({
+                          lockedByBrokerId: lead.locked_by_broker_id ?? null,
+                          currentBrokerId: broker.id,
+                          lockExpiresAt: lead.lock_expires_at ?? null,
+                          now,
+                        })
+                      }
+                      label={
+                        lead.is_unlocked
+                          ? "Lead already unlocked"
+                          : lead.locked_by_broker_id === broker.id &&
+                              lead.lock_expires_at &&
+                              new Date(lead.lock_expires_at) > now
+                            ? `Continue checkout (${getLeadPriceLabel(lead.segment)})`
+                            : undefined
+                      }
+                      helperText={
+                        lead.is_unlocked
+                          ? "This lead was already unlocked."
+                          : lead.locked_by_broker_id === broker.id &&
+                              lead.lock_expires_at &&
+                              new Date(lead.lock_expires_at) > now
+                            ? `Checkout in progress. Lock expires ${formatDateTime(lead.lock_expires_at)}.`
+                            : lead.locked_by_broker_id &&
+                                lead.lock_expires_at &&
+                                new Date(lead.lock_expires_at) > now &&
+                                lead.locked_by_broker_id !== broker.id
+                              ? `Locked by another broker until ${formatDateTime(lead.lock_expires_at)}.`
+                              : null
+                      }
+                    />
                   </article>
                 ))}
               </div>

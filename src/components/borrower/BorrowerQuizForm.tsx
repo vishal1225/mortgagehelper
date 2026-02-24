@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { submitBorrowerLeadAction } from "@/app/borrower/actions";
+import { trackEvent } from "@/lib/analytics";
 import type { LeadSegment } from "@/lib/leads";
 
 type BorrowerQuizFormProps = {
@@ -19,6 +21,7 @@ type FormState = {
   incomeStable: "yes" | "mostly" | "no" | "";
   businessYears: "3plus" | "2to3" | "1to2" | "lt1" | "";
   hasTwoYearsFinancials: "yes" | "no" | "";
+  consent: boolean;
 };
 
 const INITIAL_FORM: FormState = {
@@ -32,6 +35,7 @@ const INITIAL_FORM: FormState = {
   incomeStable: "",
   businessYears: "",
   hasTwoYearsFinancials: "",
+  consent: false,
 };
 
 function toSegmentLabel(segment: LeadSegment) {
@@ -42,6 +46,47 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const totalSteps = 3;
+  const storageKey = `borrower_quiz_${segment}`;
+  const hasStartedRef = useRef(false);
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(storageKey);
+    if (!stored) {
+      hasLoadedRef.current = true;
+      return;
+    }
+    try {
+      const parsed = JSON.parse(stored) as { step?: number; form?: FormState };
+      if (parsed.form) {
+        setForm({
+          ...INITIAL_FORM,
+          ...parsed.form,
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+        });
+      }
+      if (parsed.step && parsed.step >= 1 && parsed.step <= totalSteps) {
+        setStep(parsed.step);
+      }
+    } catch {
+      // ignore storage parse errors
+    }
+    hasLoadedRef.current = true;
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!hasLoadedRef.current) return;
+    const { firstName, lastName, email, phone, ...rest } = form;
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify({ step, form: rest }),
+    );
+  }, [form, step, storageKey]);
 
   const canAdvance = useMemo(() => {
     if (step === 1) {
@@ -59,14 +104,24 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
     }
 
     if (segment === "refinance") {
-      return Boolean(form.incomeStable);
+      return Boolean(form.incomeStable && form.consent);
     }
 
-    return Boolean(form.businessYears && form.hasTwoYearsFinancials);
+    return Boolean(form.businessYears && form.hasTwoYearsFinancials && form.consent);
   }, [form, segment, step]);
 
   return (
-    <form action={submitBorrowerLeadAction} className="space-y-6">
+    <form
+      action={submitBorrowerLeadAction}
+      className="space-y-6"
+      onSubmit={() => {
+        trackEvent("borrower_quiz_complete", { segment });
+        trackEvent("borrower_lead_submit", { segment });
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(storageKey);
+        }
+      }}
+    >
       <div className="card-muted px-3 py-2 text-sm text-slate-700">
         {step === 1 && "Step 1 of 3: Contact details"}
         {step === 2 && "Step 2 of 3: Financial profile"}
@@ -243,6 +298,28 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
               </label>
             </div>
           )}
+
+          <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={form.consent}
+              onChange={(event) => setForm({ ...form, consent: event.target.checked })}
+              className="mt-1"
+              aria-label="Consent to share details with a matching broker"
+            />
+            <span>
+              I consent to share my details with one matching broker so they can contact me.
+              See our{" "}
+              <Link href="/privacy" className="underline">
+                Privacy Policy
+              </Link>{" "}
+              and{" "}
+              <Link href="/terms" className="underline">
+                Terms
+              </Link>
+              .
+            </span>
+          </label>
         </div>
       ) : null}
 
@@ -262,7 +339,13 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
             type="button"
             disabled={!canAdvance}
             className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => setStep((prev) => prev + 1)}
+            onClick={() => {
+              if (!hasStartedRef.current && step === 1) {
+                trackEvent("borrower_quiz_start", { segment });
+                hasStartedRef.current = true;
+              }
+              setStep((prev) => prev + 1);
+            }}
           >
             Continue
           </button>
@@ -287,6 +370,7 @@ export function BorrowerQuizForm({ segment }: BorrowerQuizFormProps) {
       <input type="hidden" name="deposit_band" value={form.depositBand} />
       <input type="hidden" name="income_stable" value={form.incomeStable} />
       <input type="hidden" name="business_years" value={form.businessYears} />
+      <input type="hidden" name="consent" value={form.consent ? "yes" : ""} />
       <input
         type="hidden"
         name="has_two_years_financials"

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { logServerError } from "@/lib/server-logging";
 import { calculateReadinessScore } from "@/lib/readiness";
 import { isLeadSegment, isLeadState, type LeadSegment } from "@/lib/leads";
 
@@ -29,6 +30,7 @@ export async function submitBorrowerLeadAction(formData: FormData) {
   const incomeStable = getRequiredValue(formData, "income_stable");
   const businessYears = getRequiredValue(formData, "business_years");
   const hasTwoYearsFinancials = getRequiredValue(formData, "has_two_years_financials");
+  const consent = getRequiredValue(formData, "consent");
 
   if (!isLeadSegment(segmentRaw)) {
     redirectWithMessage("/", "Invalid quiz segment.");
@@ -53,6 +55,13 @@ export async function submitBorrowerLeadAction(formData: FormData) {
     redirectWithMessage(quizPath, "Please answer all self-employed questions.");
   }
 
+  if (!consent) {
+    redirectWithMessage(
+      quizPath,
+      "Please confirm you consent to share your details with one matching broker.",
+    );
+  }
+
   const readinessScore = calculateReadinessScore(segment, {
     creditScoreBand: creditScoreBand as "excellent" | "good" | "fair" | "poor",
     depositBand: depositBand as "gt20" | "10to20" | "lt10",
@@ -67,12 +76,14 @@ export async function submitBorrowerLeadAction(formData: FormData) {
           credit_score_band: creditScoreBand,
           deposit_band: depositBand,
           income_stable: incomeStable,
+          consent_acknowledged: true,
         }
       : {
           credit_score_band: creditScoreBand,
           deposit_band: depositBand,
           business_years: businessYears,
           has_two_years_financials: hasTwoYearsFinancials,
+          consent_acknowledged: true,
         };
 
   const supabase = await createServerSupabaseClient();
@@ -91,6 +102,11 @@ export async function submitBorrowerLeadAction(formData: FormData) {
   });
 
   if (error) {
+    await logServerError("borrower_lead_submit", error.message, {
+      segment,
+      state,
+      readinessScore,
+    });
     redirectWithMessage(quizPath, "We could not submit your quiz. Please try again.");
   }
 

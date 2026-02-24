@@ -19,7 +19,7 @@ export function Logo({ size = "md" }: LogoProps) {
   return (
     <Link href="/" className="flex items-center gap-3">
       <span
-        className={`inline-flex ${markSize} items-center justify-center rounded-xl bg-blue-600 font-semibold text-white shadow-sm`}
+        className={`inline-flex ${markSize} items-center justify-center rounded-xl bg-teal-600 font-semibold text-white shadow-sm`}
       >
         {markText}
       </span>

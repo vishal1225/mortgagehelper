@@ -1,27 +1,3 @@
-drop policy if exists "leads_select_authenticated" on public.leads;
-
-drop policy if exists "leads_select_unlocked_owned" on public.leads;
-drop policy if exists "error_logs_select_admin" on public.error_logs;
-create policy "leads_select_unlocked_owned"
-on public.leads
-for select
-to authenticated
-using (
-  is_unlocked = true
-  and exists (
-    select 1
-    from public.brokers b
-    where b.id = leads.locked_by_broker_id
-      and b.auth_user_id = auth.uid()
-  )
-);
-
-create policy "error_logs_select_admin"
-on public.error_logs
-for select
-to authenticated
-using (false);
-
 create or replace function public.get_matching_lead_previews(p_limit integer default 50)
 returns table (
   id uuid,
@@ -29,7 +5,10 @@ returns table (
   state text,
   readiness_score text,
   quiz_data jsonb,
-  created_at timestamptz
+  created_at timestamptz,
+  is_unlocked boolean,
+  locked_by_broker_id uuid,
+  lock_expires_at timestamptz
 )
 language plpgsql
 security definer
@@ -60,16 +39,14 @@ begin
     l.state,
     l.readiness_score,
     l.quiz_data,
-    l.created_at
+    l.created_at,
+    l.is_unlocked,
+    l.locked_by_broker_id,
+    l.lock_expires_at
   from public.leads l
   where l.is_unlocked = false
     and l.state = any(v_states)
     and l.segment = any(v_specialties)
-    and (
-      l.lock_expires_at is null
-      or l.lock_expires_at < now()
-      or l.locked_by_broker_id = v_broker_id
-    )
   order by l.created_at desc
   limit v_limit;
 end;
